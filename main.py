@@ -1,12 +1,20 @@
 import sys
 import os
 import requests
-from PyQt6.QtWidgets import QApplication
+import traceback
+from PyQt6.QtWidgets import QApplication, QMessageBox
 from PyQt6.QtGui import QIcon
 from core.config import ConfigManager
 from core.sniffer import SnifferThread
 from gui.settings_dialog import SettingsDialog
 from gui.tray import AgentTray
+
+def exception_hook(exc_type, exc_value, exc_tb):
+    tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    QMessageBox.critical(None, "Agent Crash", f"Unhandled exception:\n{tb}")
+    sys.exit(1)
+
+sys.excepthook = exception_hook
 
 class AgentApplication(QApplication):
     def __init__(self, argv):
@@ -23,6 +31,9 @@ class AgentApplication(QApplication):
         else:
             base_dir = os.path.dirname(os.path.abspath(__file__))
         self.icon_path = os.path.join(base_dir, 'assets', 'logo', 'logo_small.png')
+        
+        if not os.path.exists(self.icon_path):
+            QMessageBox.warning(None, "Missing Icon", f"Warning: System tray icon not found at {self.icon_path}")
                 
         # Check initial connectivity
         if not self.check_connection():

@@ -20,7 +20,18 @@ class ConfigManager:
         self.server_url = "http://localhost:8000"
         self.api_key = ""
         self.run_on_startup = False
-        self.watch_directories = []
+        
+        default_dirs = []
+        appdata = os.environ.get('APPDATA', '')
+        if appdata:
+            bambu_cache = os.path.join(appdata, 'BambuStudio', 'cache')
+            orca_cache = os.path.join(appdata, 'OrcaSlicer', 'cache')
+            if os.path.exists(bambu_cache):
+                default_dirs.append(bambu_cache)
+            if os.path.exists(orca_cache):
+                default_dirs.append(orca_cache)
+                
+        self.watch_directories = default_dirs
         self.load()
 
     def load(self):
