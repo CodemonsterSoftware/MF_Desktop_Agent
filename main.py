@@ -18,7 +18,10 @@ class AgentApplication(QApplication):
         self.sniffer = None
         
         # Determine icon path
-        base_dir = os.path.dirname(os.path.abspath(__file__))
+        if getattr(sys, 'frozen', False):
+            base_dir = sys._MEIPASS
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
         self.icon_path = os.path.join(base_dir, 'assets', 'logo', 'logo_small.png')
                 
         # Check initial connectivity
