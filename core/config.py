@@ -20,9 +20,7 @@ class ConfigManager:
         self.server_url = "http://localhost:8000"
         self.api_key = ""
         self.run_on_startup = False
-        self.watch_directories = [
-            os.path.join(os.path.expanduser('~'), 'Downloads')
-        ]
+        self.watch_directories = []
         self.load()
 
     def load(self):
