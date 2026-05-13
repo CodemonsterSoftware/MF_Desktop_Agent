@@ -48,8 +48,6 @@ class AgentTray(QObject):
         if dialog.exec():
             # Restart sniffer if settings saved
             self.sniffer.stop()
-            # Wait for thread to finish
-            self.sniffer.wait()
             # We can't restart a QThread easily, so the main loop should handle recreation or we just restart app.
             # For simplicity, we ask the app to restart the thread.
             self.app.restart_sniffer()

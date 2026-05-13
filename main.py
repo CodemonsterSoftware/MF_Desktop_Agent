@@ -63,7 +63,6 @@ class AgentApplication(QApplication):
     def start_sniffer(self):
         if self.sniffer:
             self.sniffer.stop()
-            self.sniffer.wait()
             
         self.sniffer = SnifferThread(self.config)
         self.sniffer.start()

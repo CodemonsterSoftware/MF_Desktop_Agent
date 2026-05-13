@@ -2,7 +2,7 @@ import time
 import os
 import re
 import requests
-from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -32,7 +32,7 @@ class SlicerOutputHandler(FileSystemEventHandler):
                 'filament_type': None
             })
 
-class SnifferThread(QThread):
+class SnifferThread(QObject):
     file_processed = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
 
@@ -102,7 +102,10 @@ class SnifferThread(QThread):
         except Exception as e:
             self.error_occurred.emit(f"Failed to connect to server: {e}")
 
-    def run(self):
+    def start(self):
+        if self.observer:
+            self.stop()
+            
         self.observer = Observer()
         handler = SlicerOutputHandler(self)
         
@@ -114,14 +117,6 @@ class SnifferThread(QThread):
                 
         if has_paths:
             self.observer.start()
-            try:
-                while True:
-                    time.sleep(1)
-            except Exception:
-                pass
-            finally:
-                self.observer.stop()
-                self.observer.join()
         else:
             self.error_occurred.emit("No valid watch directories found.")
 
@@ -129,4 +124,4 @@ class SnifferThread(QThread):
         if self.observer:
             self.observer.stop()
             self.observer.join()
-        self.terminate()
+            self.observer = None
