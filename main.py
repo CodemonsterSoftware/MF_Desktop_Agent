@@ -19,11 +19,7 @@ class AgentApplication(QApplication):
         
         # Determine icon path
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.icon_path = os.path.join(base_dir, 'assets', 'icon.png')
-        if not os.path.exists(self.icon_path):
-            # Create a dummy blank icon if missing
-            with open(self.icon_path, 'wb') as f:
-                pass # You can put a real default icon later
+        self.icon_path = os.path.join(base_dir, 'assets', 'logo', 'logo_small.png')
                 
         # Check initial connectivity
         if not self.check_connection():
