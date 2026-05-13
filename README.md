@@ -1,6 +1,9 @@
 # Model Foundry Desktop Agent
 
+> **Note**: This is an official accessory service for [Model Foundry](https://github.com/CodemonsterSoftware/ModelFoundry).
+
 This is the standalone desktop agent for Model Foundry. It runs in the system tray and monitors slicer output directories (Bambu Studio, OrcaSlicer, etc.) for `.gcode` and `.3mf` files, parsing print metadata and forwarding it to the Model Foundry server.
+
 
 ## Setup
 
