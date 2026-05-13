@@ -10,21 +10,31 @@ class SlicerOutputHandler(FileSystemEventHandler):
     def __init__(self, thread):
         super().__init__()
         self.thread = thread
+        self.processed = set()
 
-    def on_created(self, event):
-        if event.is_directory:
+    def process(self, filepath):
+        if os.path.isdir(filepath):
             return
             
-        filepath = event.src_path
+        filepath_lower = filepath.lower()
+        if not (filepath_lower.endswith('.gcode') or filepath_lower.endswith('.3mf')):
+            return
+
+        if filepath in self.processed:
+            return
+            
+        self.processed.add(filepath)
         filename = os.path.basename(filepath)
+        
+        self.thread.file_detected.emit(f"Found new file: {filename}")
         
         # Wait a bit to ensure the file is completely written
         time.sleep(2)
         
-        if filepath.lower().endswith('.gcode'):
+        if filepath_lower.endswith('.gcode'):
             data = self.thread.parse_gcode(filepath)
             self.thread.send_to_api(data)
-        elif filepath.lower().endswith('.3mf'):
+        elif filepath_lower.endswith('.3mf'):
             self.thread.send_to_api({
                 'filename': filename,
                 'print_time_seconds': None,
@@ -32,7 +42,14 @@ class SlicerOutputHandler(FileSystemEventHandler):
                 'filament_type': None
             })
 
+    def on_created(self, event):
+        self.process(event.src_path)
+
+    def on_moved(self, event):
+        self.process(event.dest_path)
+
 class SnifferThread(QObject):
+    file_detected = pyqtSignal(str)
     file_processed = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
 

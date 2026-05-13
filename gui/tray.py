@@ -55,6 +55,9 @@ class AgentTray(QObject):
     def open_web(self):
         webbrowser.open(self.config.server_url)
 
+    def on_file_detected(self, msg):
+        self.tray_icon.showMessage("Detecting Slice", msg, QSystemTrayIcon.MessageIcon.Information, 3000)
+
     def on_file_processed(self, msg):
         self.tray_icon.showMessage("Slice Sent", msg, QSystemTrayIcon.MessageIcon.Information, 3000)
 

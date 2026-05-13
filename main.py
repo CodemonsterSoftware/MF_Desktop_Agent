@@ -69,6 +69,7 @@ class AgentApplication(QApplication):
         
         if hasattr(self, 'tray'):
             # Update tray signals
+            self.sniffer.file_detected.connect(self.tray.on_file_detected)
             self.sniffer.file_processed.connect(self.tray.on_file_processed)
             self.sniffer.error_occurred.connect(self.tray.on_error)
 
