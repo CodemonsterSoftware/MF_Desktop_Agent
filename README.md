@@ -23,7 +23,7 @@ To build a standalone executable for Windows:
 
 ```bash
 pip install pyinstaller
-pyinstaller --noconsole --onefile --add-data "assets;assets" --icon=assets/logo/logo_small.png main.py -n modelfoundry_agent
+pyinstaller --noconsole --onefile --add-data "assets;assets" --icon=assets/logo/logo.ico main.py -n modelfoundry_agent
 ```
 
 The compiled `.exe` will be located in the `dist/` directory.

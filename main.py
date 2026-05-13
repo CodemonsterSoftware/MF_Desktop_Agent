@@ -30,7 +30,7 @@ class AgentApplication(QApplication):
             base_dir = sys._MEIPASS
         else:
             base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.icon_path = os.path.join(base_dir, 'assets', 'logo', 'logo_small.png')
+        self.icon_path = os.path.join(base_dir, 'assets', 'logo', 'logo.ico')
         
         if not os.path.exists(self.icon_path):
             QMessageBox.warning(None, "Missing Icon", f"Warning: System tray icon not found at {self.icon_path}")
