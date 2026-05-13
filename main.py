@@ -2,15 +2,29 @@ import sys
 import os
 import requests
 import traceback
+import logging
 from PyQt6.QtWidgets import QApplication, QMessageBox
 from PyQt6.QtGui import QIcon
-from core.config import ConfigManager
+from core.config import ConfigManager, get_appdata_dir
 from core.sniffer import SnifferThread
 from gui.settings_dialog import SettingsDialog
 from gui.tray import AgentTray
 
+def setup_logging():
+    log_file = os.path.join(get_appdata_dir(), 'agent.log')
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s [%(levelname)s] %(message)s',
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler()
+        ]
+    )
+    return log_file
+
 def exception_hook(exc_type, exc_value, exc_tb):
     tb = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+    logging.critical(f"Unhandled exception:\n{tb}")
     QMessageBox.critical(None, "Agent Crash", f"Unhandled exception:\n{tb}")
     sys.exit(1)
 
@@ -21,6 +35,8 @@ class AgentApplication(QApplication):
         super().__init__(argv)
         
         self.setQuitOnLastWindowClosed(False)
+        self.log_file = setup_logging()
+        logging.info("Starting ModelFoundry Desktop Agent...")
         
         self.config = ConfigManager()
         self.sniffer = None

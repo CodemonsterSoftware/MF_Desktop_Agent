@@ -2,6 +2,7 @@ import time
 import os
 import re
 import requests
+import logging
 from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -26,6 +27,7 @@ class SlicerOutputHandler(FileSystemEventHandler):
         self.processed.add(filepath)
         filename = os.path.basename(filepath)
         
+        logging.info(f"Detected valid slicer output file: {filepath}")
         self.thread.file_detected.emit(f"Found new file: {filename}")
         
         # Wait a bit to ensure the file is completely written
@@ -109,14 +111,17 @@ class SnifferThread(QObject):
         try:
             response = requests.post(url, json=data, headers=headers, timeout=5)
             if response.status_code == 200:
+                logging.info(f"Successfully uploaded metadata for {data['filename']} to Model Foundry.")
                 self.file_processed.emit(f"Successfully uploaded {data['filename']}")
             else:
                 try:
                     err_msg = response.json().get('message', 'Unknown error')
                 except:
                     err_msg = response.text
+                logging.error(f"Server rejected {data['filename']}: {err_msg}")
                 self.error_occurred.emit(f"Server error: {err_msg}")
         except Exception as e:
+            logging.error(f"Network error syncing {data['filename']}: {e}")
             self.error_occurred.emit(f"Failed to connect to server: {e}")
 
     def start(self):

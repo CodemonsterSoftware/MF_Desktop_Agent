@@ -27,9 +27,13 @@ class AgentTray(QObject):
         self.settings_action.triggered.connect(self.show_settings)
         self.menu.addAction(self.settings_action)
         
-        self.open_action = QAction("Open Model Foundry")
-        self.open_action.triggered.connect(self.open_web)
-        self.menu.addAction(self.open_action)
+        self.web_action = QAction("Open Model Foundry")
+        self.web_action.triggered.connect(self.open_web)
+        self.menu.addAction(self.web_action)
+        
+        self.log_action = QAction("Open Logs")
+        self.log_action.triggered.connect(self.open_logs)
+        self.menu.addAction(self.log_action)
         
         self.menu.addSeparator()
         self.quit_action = QAction("Quit")
@@ -54,6 +58,10 @@ class AgentTray(QObject):
 
     def open_web(self):
         webbrowser.open(self.config.server_url)
+        
+    def open_logs(self):
+        if hasattr(self.app, 'log_file') and os.path.exists(self.app.log_file):
+            os.startfile(self.app.log_file)
 
     def on_file_detected(self, msg):
         self.tray_icon.showMessage("Detecting Slice", msg, QSystemTrayIcon.MessageIcon.Information, 3000)
