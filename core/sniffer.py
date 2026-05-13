@@ -11,7 +11,7 @@ class SlicerOutputHandler(FileSystemEventHandler):
     def __init__(self, thread):
         super().__init__()
         self.thread = thread
-        self.processed = set()
+        self.processed_signatures = {}
 
     def process(self, filepath):
         if os.path.isdir(filepath):
@@ -21,17 +21,26 @@ class SlicerOutputHandler(FileSystemEventHandler):
         if not (filepath_lower.endswith('.gcode') or filepath_lower.endswith('.3mf')):
             return
 
-        if filepath in self.processed:
+        # Wait a bit to ensure the file is completely written by the slicer
+        time.sleep(2)
+        
+        try:
+            # Generate a signature based on size and modification time.
+            # This allows us to ignore duplicate watchdog events for the same save operation,
+            # but still trigger a new upload if the user slices the same file again later.
+            stat = os.stat(filepath)
+            file_sig = f"{stat.st_size}_{stat.st_mtime}"
+        except OSError:
             return
             
-        self.processed.add(filepath)
+        if self.processed_signatures.get(filepath) == file_sig:
+            return
+            
+        self.processed_signatures[filepath] = file_sig
         filename = os.path.basename(filepath)
         
-        logging.info(f"Detected valid slicer output file: {filepath}")
+        logging.info(f"Detected valid slicer output file: {filepath} (Signature: {file_sig})")
         self.thread.file_detected.emit(f"Found new file: {filename}")
-        
-        # Wait a bit to ensure the file is completely written
-        time.sleep(2)
         
         if filepath_lower.endswith('.gcode'):
             data = self.thread.parse_gcode(filepath)
