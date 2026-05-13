@@ -1,5 +1,7 @@
 import os
 import json
+import sys
+import winreg
 
 def get_appdata_dir():
     appdata = os.environ.get('APPDATA')
@@ -17,6 +19,7 @@ class ConfigManager:
     def __init__(self):
         self.server_url = "http://localhost:8000"
         self.api_key = ""
+        self.run_on_startup = False
         self.watch_directories = [
             os.path.join(os.path.expanduser('~'), 'Downloads')
         ]
@@ -29,6 +32,7 @@ class ConfigManager:
                     data = json.load(f)
                     self.server_url = data.get('server_url', self.server_url)
                     self.api_key = data.get('api_key', self.api_key)
+                    self.run_on_startup = data.get('run_on_startup', self.run_on_startup)
                     self.watch_directories = data.get('watch_directories', self.watch_directories)
             except Exception as e:
                 print(f"Error loading config: {e}")
@@ -37,6 +41,7 @@ class ConfigManager:
         data = {
             'server_url': self.server_url,
             'api_key': self.api_key,
+            'run_on_startup': self.run_on_startup,
             'watch_directories': self.watch_directories
         }
         try:
@@ -44,3 +49,28 @@ class ConfigManager:
                 json.dump(data, f, indent=4)
         except Exception as e:
             print(f"Error saving config: {e}")
+
+    def toggle_startup_registry(self, enable):
+        key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+        app_name = "ModelFoundryAgent"
+        
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_ALL_ACCESS)
+            if enable:
+                if getattr(sys, 'frozen', False):
+                    # Running as compiled pyinstaller executable
+                    app_path = f'"{sys.executable}"'
+                else:
+                    # Running as python script
+                    main_script = os.path.abspath(sys.argv[0])
+                    app_path = f'"{sys.executable}" "{main_script}"'
+                winreg.SetValueEx(key, app_name, 0, winreg.REG_SZ, app_path)
+            else:
+                try:
+                    winreg.DeleteValue(key, app_name)
+                except FileNotFoundError:
+                    pass
+            winreg.CloseKey(key)
+        except Exception as e:
+            print(f"Failed to toggle startup registry: {e}")
+

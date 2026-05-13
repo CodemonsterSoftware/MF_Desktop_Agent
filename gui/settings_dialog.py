@@ -1,7 +1,7 @@
 import os
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
                              QLineEdit, QPushButton, QListWidget, QFileDialog, 
-                             QMessageBox)
+                             QMessageBox, QCheckBox)
 import requests
 
 class SettingsDialog(QDialog):
@@ -23,6 +23,11 @@ class SettingsDialog(QDialog):
         self.api_key_input = QLineEdit(self.config.api_key)
         self.api_key_input.setEchoMode(QLineEdit.EchoMode.PasswordEchoOnEdit)
         layout.addWidget(self.api_key_input)
+        
+        # Run on Startup
+        self.startup_checkbox = QCheckBox("Run on Windows Startup")
+        self.startup_checkbox.setChecked(self.config.run_on_startup)
+        layout.addWidget(self.startup_checkbox)
         
         # Test Connection Button
         self.test_btn = QPushButton("Test Connection")
@@ -93,6 +98,10 @@ class SettingsDialog(QDialog):
     def save_settings(self):
         self.config.server_url = self.url_input.text().strip()
         self.config.api_key = self.api_key_input.text().strip()
+        
+        # Handle Startup Checkbox
+        self.config.run_on_startup = self.startup_checkbox.isChecked()
+        self.config.toggle_startup_registry(self.config.run_on_startup)
         
         self.config.watch_directories = [self.dir_list.item(i).text() for i in range(self.dir_list.count())]
         
