@@ -22,14 +22,14 @@ class ConfigManager:
         self.run_on_startup = False
         
         default_dirs = []
-        appdata = os.environ.get('APPDATA', '')
-        if appdata:
-            bambu_cache = os.path.join(appdata, 'BambuStudio', 'cache')
-            orca_cache = os.path.join(appdata, 'OrcaSlicer', 'cache')
-            if os.path.exists(bambu_cache):
-                default_dirs.append(bambu_cache)
-            if os.path.exists(orca_cache):
-                default_dirs.append(orca_cache)
+        temp_dir = os.environ.get('TEMP', '')
+        if temp_dir:
+            bambu_temp = os.path.join(temp_dir, 'bamboo_model')
+            orca_temp = os.path.join(temp_dir, 'orca_model')
+            if os.path.exists(bambu_temp):
+                default_dirs.append(bambu_temp)
+            if os.path.exists(orca_temp):
+                default_dirs.append(orca_temp)
                 
         self.watch_directories = default_dirs
         self.load()

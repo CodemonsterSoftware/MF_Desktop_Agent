@@ -112,7 +112,7 @@ class SnifferThread(QObject):
         has_paths = False
         for path in self.config.watch_directories:
             if os.path.exists(path):
-                self.observer.schedule(handler, path, recursive=False)
+                self.observer.schedule(handler, path, recursive=True)
                 has_paths = True
                 
         if has_paths:
